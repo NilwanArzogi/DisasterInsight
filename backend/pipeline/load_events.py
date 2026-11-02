@@ -1,4 +1,3 @@
-"""Memuat tiga file kejadian BNPB (DIBI) dan menyeragamkan nama kolomnya."""
 from pathlib import Path
 
 import pandas as pd
@@ -6,22 +5,20 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 RAW_DIR = ROOT / "data" / "raw"
 
-# jenis bencana (sesuai kolom "Kejadian" di data BNPB) -> nama file mentah
 EVENT_FILES = {
     "BANJIR": "Banjir.xlsx",
     "TANAH LONGSOR": "Tanah_Longsor.xlsx",
     "KEBAKARAN HUTAN DAN LAHAN": "Kebakaran_Hutan_dan_Lahan.xlsx",
 }
 
-# kolom di file BNPB -> nama kolom di proyek
 COLUMN_MAP = {
     "ID Kabupaten": "kode_kabupaten",
     "Tanggal Kejadian": "tanggal",
     "Kejadian": "jenis_bencana",
     "Kabupaten": "nama_kabupaten",
     "Provinsi": "provinsi",
-    "Lokasi": "lokasi",      # hanya untuk deteksi duplikat
-    "Penyebab": "penyebab",  # hanya untuk deteksi duplikat
+    "Lokasi": "lokasi",    
+    "Penyebab": "penyebab",  
 }
 
 
@@ -43,7 +40,6 @@ def load_event_file(path: Path) -> pd.DataFrame:
 
 
 def load_all_events() -> pd.DataFrame:
-    """Gabungkan ketiga file, dan pastikan isi kolom jenis sesuai nama file."""
     frames = []
     for jenis, nama_file in EVENT_FILES.items():
         df = load_event_file(RAW_DIR / nama_file)

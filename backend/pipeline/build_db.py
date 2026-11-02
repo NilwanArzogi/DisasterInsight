@@ -1,10 +1,3 @@
-"""Bangun database SQLite dari data bersih dan file agregat.
-
-Penggunaan (dari folder backend, dengan .venv aktif):
-    python pipeline/build_db.py              # gagal jika database sudah berisi
-    python pipeline/build_db.py --timpa      # hapus dan bangun ulang (butuh konfirmasi)
-    python pipeline/build_db.py "..\\data\\raw\\NAMA_FILE_AGREGAT.xlsx"
-"""
 import argparse
 import sys
 from datetime import datetime, timezone
@@ -33,7 +26,6 @@ def siapkan_tabel(kejadian: pd.DataFrame, agregat_panjang: pd.DataFrame, provins
     tanpa_provinsi = wilayah[wilayah["provinsi"].isna()]
     if len(tanpa_provinsi):
         raise ValueError(
-            "Kode provinsi tidak ada di reference/provinsi.csv: "
             + ", ".join(sorted(tanpa_provinsi["kode_provinsi"].unique()))
         )
     wilayah = wilayah.rename(columns={"kode_kabupaten": "kode", "nama_kabupaten": "nama"})[

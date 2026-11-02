@@ -1,13 +1,3 @@
-"""Uji konsistensi dua sumber data.
-
-Aturan: untuk setiap kabupaten dan tahun, jumlah banjir + longsor + karhutla
-(data per kejadian, setelah dibersihkan) tidak boleh melebihi total semua jenis
-bencana di file agregat. Kabupaten yang tidak cocok kodenya juga dilaporkan.
-
-Penggunaan (dari folder backend, dengan .venv aktif):
-    python pipeline/check_consistency.py
-    python pipeline/check_consistency.py "..\\data\\raw\\NAMA_FILE_AGREGAT.xlsx"
-"""
 import sys
 from pathlib import Path
 
@@ -34,7 +24,6 @@ def cari_file_agregat(argumen: list) -> Path:
 def uji(kejadian: pd.DataFrame, agregat: pd.DataFrame) -> dict:
     kode_agregat = set(agregat["kode_kabupaten"])
 
-    # kode yang ada di data kejadian tetapi tidak ada di file agregat
     luar = kejadian[~kejadian["kode_kabupaten"].isin(kode_agregat)]
     luar_ringkas = (
         luar.groupby(["kode_kabupaten", "nama_kabupaten", "provinsi"])
@@ -44,7 +33,6 @@ def uji(kejadian: pd.DataFrame, agregat: pd.DataFrame) -> dict:
         .sort_values("jumlah_kejadian", ascending=False)
     )
 
-    # kode yang ada di file agregat tetapi tidak punya kejadian 3 jenis sama sekali
     kode_kejadian = set(kejadian["kode_kabupaten"])
     tanpa_kejadian = agregat[~agregat["kode_kabupaten"].isin(kode_kejadian)]
     jumlah_tanpa_kejadian = tanpa_kejadian["kode_kabupaten"].nunique()

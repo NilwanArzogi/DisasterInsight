@@ -1,9 +1,3 @@
-"""Pembersihan data kejadian sesuai aturan di dokumen keputusan Fase 1.
-
-Keluaran:
-- data/clean/kejadian_2018_2023.csv   (data bersih, tidak masuk Git)
-- docs/laporan_kualitas_data.md       (laporan kualitas, masuk Git)
-"""
 import pandas as pd
 from load_events import ROOT, load_all_events
 
@@ -19,14 +13,11 @@ NORMALISASI_PROVINSI = {
     "P A P U A": "PAPUA",
 }
 
-# baris dianggap identik penuh jika semua kolom ini sama
 KUNCI_IDENTIK = ["kode_kabupaten", "tanggal", "jenis_bencana", "lokasi", "penyebab"]
-# baris ditandai (tidak dihapus) jika hanya tiga kolom ini yang sama
 KUNCI_KAB_TGL_JENIS = ["kode_kabupaten", "tanggal", "jenis_bencana"]
 
 
 def terapkan_padanan(df: pd.DataFrame) -> pd.DataFrame:
-    """Ganti kode lama (Papua sebelum pemekaran 2022) dengan kode baru."""
     padanan = pd.read_csv(CROSSWALK_CSV, dtype=str)
     peta = dict(zip(padanan["kode_lama"], padanan["kode_baru"]))
     df["kode_asal"] = df["kode_kabupaten"]
@@ -35,7 +26,6 @@ def terapkan_padanan(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def bersihkan(data: pd.DataFrame):
-    """Kembalikan (data bersih, tabel ringkasan per jenis)."""
     ringkasan = pd.DataFrame(index=sorted(data["jenis_bencana"].unique()))
     ringkasan["dimuat"] = data.groupby("jenis_bencana").size()
 

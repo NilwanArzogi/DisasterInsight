@@ -1,13 +1,3 @@
-"""Usulan tabel padanan kode kabupaten (terutama Papua).
-
-Untuk setiap kode di data kejadian yang tidak ada di file agregat, cari
-kabupaten di file agregat dengan nama yang sama atau mirip. Hasilnya hanya
-USULAN: harus diperiksa manual sebelum dipakai.
-
-Penggunaan (dari folder backend, dengan .venv aktif):
-    python pipeline/suggest_crosswalk.py
-    python pipeline/suggest_crosswalk.py "..\\data\\raw\\NAMA_FILE_AGREGAT.xlsx"
-"""
 import sys
 from difflib import get_close_matches
 

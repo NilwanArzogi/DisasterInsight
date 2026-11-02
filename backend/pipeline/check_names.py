@@ -1,11 +1,3 @@
-"""Periksa apakah kode kabupaten yang sama merujuk ke nama yang sama di dua sumber.
-
-Tujuan: menemukan kode yang dipakai ulang untuk wilayah lain, yang tidak
-terdeteksi oleh uji konsistensi (karena kodenya ada di kedua file).
-
-Penggunaan (dari folder backend, dengan .venv aktif):
-    python pipeline/check_names.py
-"""
 import re
 import sys
 
@@ -15,7 +7,6 @@ from load_aggregate import load_aggregate
 
 
 def normalisasi(nama: str) -> str:
-    """Samakan ejaan: huruf besar, tanpa awalan KAB/KABUPATEN, tanpa spasi dan tanda baca."""
     nama = str(nama).upper().strip()
     nama = re.sub(r"^(KABUPATEN|KAB\.?)\s+", "", nama)
     return re.sub(r"[^A-Z0-9]", "", nama)

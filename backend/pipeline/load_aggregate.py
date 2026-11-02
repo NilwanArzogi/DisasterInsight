@@ -1,8 +1,3 @@
-"""Memuat file agregat BNPB: jumlah kejadian semua jenis per kabupaten per tahun.
-
-Penggunaan (dari folder backend, dengan .venv aktif):
-    python pipeline/load_aggregate.py ..\\data\\raw\\NAMA_FILE.csv
-"""
 import sys
 from pathlib import Path
 
@@ -22,13 +17,11 @@ def _baca_mentah(path: Path) -> pd.DataFrame:
 
 
 def _nama_tahun(nama) -> str:
-    """Ubah nama kolom seperti 2018.0 atau 2018 menjadi teks '2018'."""
     teks = str(nama).strip()
     return teks[:-2] if teks.endswith(".0") else teks
 
 
 def load_aggregate(path: Path) -> pd.DataFrame:
-    """Kembalikan tabel panjang: kode_kabupaten, nama_kabupaten, tahun, jumlah_semua_jenis."""
     mentah = _baca_mentah(path)
     mentah.columns = [_nama_tahun(c) for c in mentah.columns]
 

@@ -1,28 +1,14 @@
-"""Perhitungan Location Quotient (LQ) kejadian bencana per kabupaten/kota.
-
-LQ(i,k) = [E(i,k) / E(i,semua)] / [E(nasional,k) / E(nasional,semua)]
-
-LQ adalah ukuran konsentrasi relatif jumlah kejadian yang DILAPORKAN. LQ tidak
-mempertimbangkan penduduk, luas wilayah, paparan, kerentanan, maupun kapasitas
-penanggulangan, dan bukan probabilitas, prediksi, atau peta rawan resmi.
-"""
 import math
 
 import pandas as pd
 
 JENIS_FOKUS = ["BANJIR", "TANAH LONGSOR", "KEBAKARAN HUTAN DAN LAHAN"]
 SATUAN_VALID = ("baris", "kab_hari_jenis")
-AMBANG_MINIMUM = 10  # kabupaten dengan total kejadian di bawah ini diberi peringatan
+AMBANG_MINIMUM = 10 
 
 
 def lq_satu(e_ik, e_i_semua, e_nasional_k, e_nasional_semua):
-    """Hitung satu nilai LQ. Kembalikan (lq, status).
 
-    status:
-    - "ok"                    : LQ dihitung, kejadian jenis ini ada
-    - "tidak_ada_laporan"     : kejadian jenis ini nol (LQ = 0.0), penyebut valid
-    - "tidak_dapat_dihitung"  : salah satu penyebut nol, LQ = NaN
-    """
     nilai = (e_ik, e_i_semua, e_nasional_k, e_nasional_semua)
     if any(pd.isna(v) or v < 0 for v in nilai):
         raise ValueError(f"Jumlah kejadian harus bilangan tidak negatif: {nilai}")
@@ -37,7 +23,6 @@ def lq_satu(e_ik, e_i_semua, e_nasional_k, e_nasional_semua):
 
 
 def kategori_lq(lq, status):
-    """Kategori untuk legenda peta. Bukan tingkat risiko."""
     if status == "tidak_dapat_dihitung":
         return "tidak dapat dihitung"
     if status == "tidak_ada_laporan":
@@ -79,7 +64,6 @@ def hitung_lq(
     k = _terapkan_satuan(k, satuan)
     ag = agregat[agregat["tahun"].between(tahun_awal, tahun_akhir)]
 
-    # penyebut per kabupaten-tahun: agregat tidak boleh lebih kecil dari jumlah jenis fokus
     fokus = k.groupby(["kode_kabupaten", "tahun"]).size().rename("jenis_fokus").reset_index()
     kt = ag[["kode_kabupaten", "tahun", "jumlah_semua_jenis"]].merge(
         fokus, on=["kode_kabupaten", "tahun"], how="outer"
@@ -103,7 +87,7 @@ def hitung_lq(
         for j in jenis:
             e = int(e_ik.get((kode, j), 0))
             semua = int(e_i_semua[kode])
-            semua_efektif = max(semua, e)  # pengaman; tidak berpengaruh bila penyebut sudah max
+            semua_efektif = max(semua, e)  
             lq, status = lq_satu(e, semua_efektif, int(e_nasional_k[j]), int(e_nasional_semua))
             baris.append(
                 {

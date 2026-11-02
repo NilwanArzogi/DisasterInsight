@@ -1,13 +1,3 @@
-"""Jalankan perhitungan LQ pada data nyata 2018-2023, validasi, dan uji sensitivitas.
-
-Keluaran:
-- data/output/lq_2018_2023.csv             (hasil utama, tidak masuk Git)
-- data/output/lq_sensitivitas_2018_2023.csv (perbandingan dua satuan hitung, tidak masuk Git)
-- docs/laporan_lq.md                        (ringkasan, masuk Git)
-
-Penggunaan (dari folder backend, dengan .venv aktif):
-    python pipeline/run_lq.py
-"""
 import sys
 
 import pandas as pd
@@ -19,7 +9,7 @@ from lq import JENIS_FOKUS, hitung_lq
 TAHUN_AWAL, TAHUN_AKHIR = 2018, 2023
 OUTPUT_DIR = ROOT / "data" / "output"
 DOCS_DIR = ROOT / "docs"
-KODE_PERIKSA_MANUAL = "3201"  # Bogor
+KODE_PERIKSA_MANUAL = "3201"  
 JENIS_PERIKSA_MANUAL = "TANAH LONGSOR"
 
 
@@ -66,7 +56,6 @@ def ringkas_sensitivitas(sens: pd.DataFrame) -> pd.DataFrame:
         baris.append({
             "jenis": jenis,
             "kabupaten_dibandingkan": len(ok),
-            # korelasi Spearman = korelasi Pearson pada peringkat (tanpa perlu scipy)
             "korelasi_peringkat": round(ok["lq_baris"].rank().corr(ok["lq_unik"].rank()), 3),
             "ganti_kategori": int(grup["ganti_kategori"].sum()),
             "lintas_batas_1": int(grup["lintas_batas_1"].sum()),
