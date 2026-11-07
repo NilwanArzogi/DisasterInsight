@@ -1,0 +1,175 @@
+# DisasterInsight Indonesia
+
+Analisis **Location Quotient (LQ)** kejadian bencana **banjir, tanah longsor, dan kebakaran hutan dan lahan** per kabupaten/kota di Indonesia (periode **2018–2023**), berbasis Sistem Informasi Geografis (SIG).
+
+Proyek ini terdiri dari dua bagian yang memakai data dan rumus yang sama:
+
+1. **Aplikasi web**: dashboard, peta choropleth LQ, dan tabel analisis.
+2. **Dashboard Power BI**: untuk analisis bisnis dan intelijen (BI).
+
+> **Penting.** LQ adalah ukuran konsentrasi relatif jumlah kejadian yang dilaporkan, dibandingkan dengan seluruh Indonesia. LQ **bukan probabilitas, bukan prediksi, dan bukan peta rawan bencana resmi BNPB**. LQ tidak mempertimbangkan jumlah penduduk, luas wilayah, paparan, kerentanan, maupun kapasitas penanggulangan.
+
+<!-- TODO: tambahkan screenshot, misalnya docs/screenshot-web.png dan docs/screenshot-powerbi.png -->
+
+---
+
+## Fitur
+
+- Dashboard ringkasan: KPI total kejadian, tren per tahun, dan filter (jenis bencana, periode, provinsi).
+- Peta choropleth LQ per kabupaten/kota (Leaflet) dengan popup detail.
+- Tabel analisis LQ dengan pencarian, filter, pengurutan, paginasi, dan **ekspor CSV**.
+- Penanda **⚠ Data sedikit** untuk wilayah yang jumlah kejadiannya terlalu kecil, karena LQ-nya mudah berubah drastis.
+- Catatan metode dan disclaimer yang selalu tampil di halaman.
+- Dashboard Power BI dengan model bintang (star schema) dan measure DAX yang sesuai dengan backend.
+- Pengujian otomatis (61 test).
+
+## Teknologi
+
+| Bagian | Teknologi |
+|---|---|
+| Frontend | React, Vite, TypeScript, Tailwind CSS, Leaflet |
+| Backend | Python, FastAPI, Pandas |
+| Pengujian | Pytest |
+| BI | Power BI Desktop (model bintang, DAX) |
+| Batas wilayah | GeoJSON dan TopoJSON kabupaten/kota (514 poligon) |
+
+<!-- TODO: sebutkan database yang dipakai (misalnya SQLite/PostgreSQL) dan library tambahan (misalnya Recharts) -->
+
+## Struktur folder
+
+```
+DisasterInsight/
+├── backend/
+│   ├── app/                  # FastAPI (main.py, lq.py, dst.)
+│   └── tests/                # test_api.py, test_api_lq.py, test_lq.py
+├── frontend/
+│   ├── public/data/
+│   │   └── kabkota.geojson   # batas wilayah untuk peta web
+│   └── src/                  # aplikasi React
+├── scripts/
+│   ├── unduh_batas.py        # membangun GeoJSON batas kabupaten/kota
+│   └── ekspor_powerbi.py     # mengekspor tabel bintang untuk Power BI
+├── data/
+│   └── powerbi/              # CSV model bintang + kabkota.topojson
+└── README.md
+```
+
+<!-- TODO: sesuaikan dengan struktur folder sebenarnya -->
+
+## Cara menjalankan
+
+### Prasyarat
+
+- Python 3.12
+- Node.js (LTS) dan npm
+- Power BI Desktop (hanya untuk membuka dashboard BI)
+
+### 1. Backend
+
+```powershell
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:create_app --factory --reload --port 8000
+```
+
+Cek: buka `http://localhost:8000/api/ringkasan`. Hasilnya harus memuat `total_kejadian` **18337**.
+
+### 2. Frontend
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Buka alamat yang tampil di terminal (biasanya `http://localhost:5173`). Backend harus sudah berjalan.
+
+### 3. Impor data ke database
+
+<!-- TODO: tulis perintah impor data yang sebenarnya (skrip, nama file input, lokasi database) -->
+
+### 4. Pengujian
+
+```powershell
+cd backend
+pytest -v
+```
+
+Hasil yang diharapkan: **61 passed**. Test yang membaca angka asli membutuhkan database yang sudah terisi.
+
+### 5. Dashboard Power BI
+
+1. Jalankan `scripts/ekspor_powerbi.py` untuk menghasilkan CSV di `data/powerbi/`.
+2. Buka file `.pbix` di Power BI Desktop (atau impor CSV dan buat ulang relasinya).
+3. Peta memakai `data/powerbi/kabkota.topojson` (join `kode_kabupaten` dengan `kdpkab`).
+
+<!-- TODO: tulis lokasi file .pbix di repo, atau catat bahwa .pbix tidak disertakan -->
+
+## Metodologi
+
+**Rumus Location Quotient**
+
+```
+LQ(i,k) = ( E(i,k) / E(i,semua) ) / ( E(nasional,k) / E(nasional,semua) )
+```
+
+- `E(i,k)`: jumlah kejadian jenis bencana *k* di kabupaten/kota *i*.
+- `E(i,semua)`: jumlah kejadian semua jenis bencana di kabupaten/kota *i*.
+- `E(nasional,k)`: jumlah kejadian jenis *k* di seluruh Indonesia.
+- `E(nasional,semua)`: jumlah kejadian semua jenis di seluruh Indonesia (**26.671** untuk 2018–2023).
+
+**Interpretasi**
+
+| Nilai | Arti |
+|---|---|
+| LQ > 1 | Jenis bencana itu **lebih terkonsentrasi** di wilayah tersebut dibanding rata-rata nasional |
+| LQ = 1 | Sama dengan proporsi nasional |
+| LQ < 1 | Kurang terkonsentrasi dibanding nasional |
+| Tidak ada laporan | Tidak ada kejadian jenis itu tercatat (LQ = 0) |
+| Tidak dapat dihitung | Penyebut nol (misalnya tidak ada data wilayah) |
+
+**Keputusan metodologis**
+
+- **Periode**: 2018–2023.
+- **Pembilang**: jumlah kejadian per jenis bencana dari data kejadian DIBI BNPB (setelah pembersihan).
+- **Penyebut**: total kejadian **semua jenis bencana** per kabupaten/kota per tahun, dari data agregat BNPB. Penyebut diambil sebagai nilai terbesar antara jumlah agregat dan jumlah tiga jenis fokus, supaya tidak lebih kecil dari pembilang.
+- **Data sedikit**: wilayah dengan total kejadian di bawah ambang tertentu diberi penanda ⚠, karena LQ-nya tidak stabil (satu kejadian tambahan bisa mengubah nilainya banyak). <!-- TODO: tulis nilai ambang yang dipakai -->
+- **Acuan nasional** tetap seluruh Indonesia, bahkan saat tabel difilter per provinsi.
+- **Kabupaten/kota tanpa kejadian** tetap dihitung (LQ = 0, status "tidak ada laporan").
+
+**Validasi**
+
+| Pemeriksaan | Hasil |
+|---|---|
+| Total kejadian | 18.337 |
+| Bogor (3201), tanah longsor | LQ 2,631 (723 dari 1.349 kejadian) |
+| Mahakam Ulu (6411), tanah longsor | LQ 4,909 (2 dari 2 kejadian, data sedikit) |
+| Baris Total di Power BI | LQ 1,00 |
+
+Angka-angka ini cocok di API, aplikasi web, dan Power BI.
+
+## Sumber data
+
+- Data kejadian bencana: **DIBI BNPB** (https://gis.bnpb.go.id/databencana/tabel/pencarian.php), banjir, tanah longsor, dan kebakaran hutan dan lahan.
+- Penyebut: **Jumlah kejadian bencana menurut kabupaten**, Portal Satu Data Bencana Indonesia (https://data.bnpb.go.id/dataset/data-bencana-indonesia).
+- Batas wilayah kabupaten/kota: **BIG** (join pada kode `kdpkab`).
+
+Data diunduh dari sumber resmi dan **tidak ada data yang dibuat sendiri**. Periksa ketentuan penggunaan masing-masing sumber sebelum mendistribusikan ulang data mentah.
+
+## Batasan
+
+- Hanya tiga jenis bencana (banjir, tanah longsor, karhutla) dan periode 2018–2023.
+- LQ didasarkan pada **jumlah kejadian yang dilaporkan**, sehingga bisa dipengaruhi perbedaan pelaporan antar-wilayah.
+- Tidak memperhitungkan penduduk, luas wilayah, paparan, kerentanan, atau kapasitas penanggulangan.
+- Wilayah ⚠ Data sedikit sebaiknya tidak dipakai sebagai dasar peringkat atau kesimpulan.
+- Batas wilayah mengikuti sumber BIG dan bisa berbeda dari pemekaran terbaru.
+
+## Lisensi
+
+<!-- TODO: pilih lisensi (misalnya MIT untuk kode) dan catat bahwa data tunduk pada ketentuan sumbernya -->
+
+## Penulis
+
+<!-- TODO: nama, institusi, dan kontak -->

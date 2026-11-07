@@ -1,0 +1,20 @@
+﻿  diunduh 100 fitur
+  diunduh 200 fitur
+  diunduh 300 fitur
+  diunduh 400 fitur
+  diunduh 500 fitur
+  diunduh 548 fitur
+
+Disimpan: D:\DisasterInsight\frontend\public\data\kabkota.geojson  (2.70 MB)
+Fitur BIG: 548 | dilewati (tanpa kode/geometri): 27
+Wilayah di peta: 515 | kode di data LQ: 510
+Kode dikonversi lewat crosswalk: 0
+
+Kode LQ tanpa poligon:
+
+Poligon tanpa data LQ:
+   71057110 Minahasa Selatan/Bolaang Mongondwo Timur (Sulawesi Utara)
+   7412 Konawe Kepulauan (Sulawesi Tenggara)
+   9208 Kaimana (Papua Barat)
+   9506 Yalimo (Papua Pegunungan)
+   9508 Nduga (Papua Pegunungan)

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
+import PetaLQ from './components/PetaLQ'
+import TabelLQ from './components/TabelLQ'
 
 type Ringkasan = Record<string, unknown>
 
 const label = (k: string) => k.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())
-
-const fmt = (v: unknown) =>
-  typeof v === 'number' ? v.toLocaleString('id-ID') : String(v)
+const fmt = (v: unknown) => (typeof v === 'number' ? v.toLocaleString('id-ID') : String(v))
 
 export default function App() {
   const [data, setData] = useState<Ringkasan | null>(null)
@@ -22,13 +22,15 @@ export default function App() {
   }, [])
 
   const kpis = data
-    ? Object.entries(data).filter(([, v]) => typeof v === 'number' || typeof v === 'string')
+    ? Object.entries(data).filter(
+        ([k, v]) => k !== 'catatan_metode' && (typeof v === 'number' || typeof v === 'string'),
+      )
     : []
 
   return (
     <div className="min-h-screen bg-slate-50 p-6">
       <h1 className="text-2xl font-bold text-slate-800">DisasterInsight Indonesia</h1>
-      <p className="text-sm text-slate-500 mb-6">
+      <p className="mb-6 text-sm text-slate-500">
         Analisis Location Quotient kejadian bencana, 2018–2023
       </p>
 
@@ -48,9 +50,14 @@ export default function App() {
         ))}
       </div>
 
-      <p className="mt-8 text-xs text-slate-400">
-        LQ adalah indeks konsentrasi relatif, bukan probabilitas, prediksi, atau peta risiko resmi BNPB.
-      </p>
+      <PetaLQ />
+      <TabelLQ />
+
+      {typeof data?.catatan_metode === 'string' && (
+        <p className="mt-6 rounded bg-amber-50 p-3 text-xs text-slate-600">
+          <b>Catatan metode.</b> {data.catatan_metode}
+        </p>
+      )}
     </div>
   )
 }

@@ -70,7 +70,6 @@ def baris(respons, kode, jenis):
     return next(b for b in respons.json()["data"] if b["kode_kabupaten"] == kode and b["jenis_bencana"] == jenis)
 
 
-# ---------- dasar ----------
 def test_health(klien):
     assert klien.get("/api/health").json() == {"status": "ok"}
 
@@ -94,7 +93,6 @@ def test_muat_data_gagal_jika_database_belum_dibuat():
         muat_data(buat_engine("sqlite://"))
 
 
-# ---------- LQ sesuai hitungan tangan ----------
 def test_lq_sesuai_hitungan_tangan(klien):
     r = klien.get("/api/lq", params={"tahun_awal": 2020, "tahun_akhir": 2020})
     assert r.status_code == 200
@@ -102,7 +100,7 @@ def test_lq_sesuai_hitungan_tangan(klien):
     assert baris(r, "1102", K)["lq"] == pytest.approx(2.5)
     assert baris(r, "1102", B)["lq"] == pytest.approx(0.25)
     assert baris(r, "1101", L)["kategori"] == "LQ = 1"
-    assert r.json()["meta"]["jumlah_total"] == 12  # 4 kabupaten x 3 jenis
+    assert r.json()["meta"]["jumlah_total"] == 12
 
 
 def test_penyebut_nol_menjadi_null_bukan_nan(klien):
@@ -117,18 +115,16 @@ def test_periode_default_mencakup_semua_tahun(klien):
     r = klien.get("/api/lq", params={"jenis": B})
     meta = r.json()["meta"]
     assert (meta["periode"]["awal"], meta["periode"]["akhir"]) == (2020, 2021)
-    # banjir 1101: 6+2 = 8 kejadian; penyebut 10 + max(4,2) = 14
     b = baris(r, "1101", B)
     assert (b["e_ik"], b["e_i_semua"]) == (8, 14)
 
 
-# ---------- filter, pencarian, urutan, halaman ----------
 def test_filter_provinsi_tidak_mengubah_acuan_nasional(klien):
     r = klien.get("/api/lq", params={"tahun_awal": 2020, "tahun_akhir": 2020, "provinsi": "12", "jenis": B})
     data = r.json()["data"]
     assert [d["kode_kabupaten"] for d in data] == ["1201"]
     assert data[0]["lq"] == pytest.approx(1.5)
-    assert data[0]["e_nasional_semua"] == 25  # tetap nasional
+    assert data[0]["e_nasional_semua"] == 25  
 
 
 def test_filter_jenis_dan_kategori(klien):
@@ -151,7 +147,7 @@ def test_urutan_dan_halaman(klien):
     params = {"tahun_awal": 2020, "tahun_akhir": 2020, "jenis": K, "urut": "e_ik", "arah": "desc", "ukuran": 1}
     p1 = klien.get("/api/lq", params={**params, "halaman": 1}).json()
     p2 = klien.get("/api/lq", params={**params, "halaman": 2}).json()
-    assert p1["data"][0]["kode_kabupaten"] == "1102"  # 4 kejadian karhutla, tertinggi
+    assert p1["data"][0]["kode_kabupaten"] == "1102" 
     assert p1["data"][0]["kode_kabupaten"] != p2["data"][0]["kode_kabupaten"]
     assert p1["meta"]["jumlah_total"] == 4
 
@@ -161,24 +157,22 @@ def test_urut_lq_menaruh_null_di_akhir(klien):
     assert r.json()["data"][-1]["kode_kabupaten"] == "1301"
 
 
-# ---------- ringkasan ----------
 def test_ringkasan(klien):
     j = klien.get("/api/ringkasan", params={"tahun_awal": 2020, "tahun_akhir": 2020}).json()
     assert j["total_kejadian"] == 19
     assert {p["jenis_bencana"]: p["jumlah"] for p in j["per_jenis"]} == {B: 10, L: 5, K: 4}
     assert j["wilayah_tertinggi"][0]["jumlah"] == 8
-    assert len(j["tren"]) == 3  # 1 tahun x 3 jenis
+    assert len(j["tren"]) == 3  
     banjir = next(r for r in j["ringkasan_lq"] if r["jenis_bencana"] == B)
     assert banjir["kategori"]["tidak dapat dihitung"] == 1
 
 
 def test_ringkasan_filter_provinsi_dan_jenis(klien):
     j = klien.get("/api/ringkasan", params={"provinsi": "11", "jenis": B}).json()
-    assert j["total_kejadian"] == 9  # 6 + 1 (2020) + 2 (2021)
+    assert j["total_kejadian"] == 9 
     assert [p["jenis_bencana"] for p in j["per_jenis"]] == [B]
 
 
-# ---------- detail wilayah ----------
 def test_detail_wilayah(klien):
     r = klien.get("/api/wilayah/1102", params={"tahun_awal": 2020, "tahun_akhir": 2020})
     j = r.json()
@@ -193,7 +187,6 @@ def test_detail_wilayah_tidak_ada(klien):
     assert r.status_code == 404 and r.json()["detail"] == "Wilayah tidak ditemukan."
 
 
-# ---------- validasi masukan ----------
 @pytest.mark.parametrize("url", [
     "/api/lq?tahun_awal=2021&tahun_akhir=2020",
     "/api/lq?tahun_awal=1999",
