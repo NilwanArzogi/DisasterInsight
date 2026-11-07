@@ -209,8 +209,6 @@ def test_masukan_tidak_valid_ditolak(klien, url):
     assert klien.get(url).status_code in (404, 422)
     assert klien.get(url).status_code != 500
 
-
-# ---------- keamanan ----------
 def test_cors_hanya_origin_yang_diizinkan(klien):
     ok = klien.get("/api/health", headers={"Origin": "http://localhost:5173"})
     asing = klien.get("/api/health", headers={"Origin": "https://jahat.example"})

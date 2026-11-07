@@ -121,7 +121,7 @@ def create_app(engine=None) -> FastAPI:
         ukuran: int = Query(50, ge=1, le=2000),
     ):
         cek_provinsi(store, provinsi)
-        hasil = store.lq(*per)  # acuan nasional tidak berubah oleh filter provinsi
+        hasil = store.lq(*per) 
         if jenis:
             hasil = hasil[hasil["jenis_bencana"] == jenis]
         if provinsi:

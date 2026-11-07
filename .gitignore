@@ -22,4 +22,9 @@ data/output/
 .vscode/
 Thumbs.db
 
-scripts/
+hasil.txt
+hasil_batas.txt
+
+scripts/*
+!scripts/unduh_batas.py
+!scripts/ekspor_powerbi.py
