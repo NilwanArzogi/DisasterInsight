@@ -9,8 +9,7 @@ Proyek ini terdiri dari dua bagian yang memakai data dan rumus yang sama:
 
 > **Penting.** LQ adalah ukuran konsentrasi relatif jumlah kejadian yang dilaporkan, dibandingkan dengan seluruh Indonesia. LQ **bukan probabilitas, bukan prediksi, dan bukan peta rawan bencana resmi BNPB**. LQ tidak mempertimbangkan jumlah penduduk, luas wilayah, paparan, kerentanan, maupun kapasitas penanggulangan.
 
-<!-- TODO: tambahkan screenshot, misalnya docs/screenshot-web.png dan docs/screenshot-powerbi.png -->
-
+.
 ---
 
 ## Fitur
@@ -28,12 +27,11 @@ Proyek ini terdiri dari dua bagian yang memakai data dan rumus yang sama:
 | Bagian | Teknologi |
 |---|---|
 | Frontend | React, Vite, TypeScript, Tailwind CSS, Leaflet |
-| Backend | Python, FastAPI, Pandas |
+| Backend | Python, FastAPI, SQLAlchemy, Pandas |
+| Database | SQLite (`data/disasterinsight.db`) |
 | Pengujian | Pytest |
 | BI | Power BI Desktop (model bintang, DAX) |
 | Batas wilayah | GeoJSON dan TopoJSON kabupaten/kota (514 poligon) |
-
-<!-- TODO: sebutkan database yang dipakai (misalnya SQLite/PostgreSQL) dan library tambahan (misalnya Recharts) -->
 
 ## Struktur folder
 
@@ -53,8 +51,6 @@ DisasterInsight/
 │   └── powerbi/              # CSV model bintang + kabkota.topojson
 └── README.md
 ```
-
-<!-- TODO: sesuaikan dengan struktur folder sebenarnya -->
 
 ## Cara menjalankan
 
@@ -88,7 +84,20 @@ Buka alamat yang tampil di terminal (biasanya `http://localhost:5173`). Backend 
 
 ### 3. Impor data ke database
 
-<!-- TODO: tulis perintah impor data yang sebenarnya (skrip, nama file input, lokasi database) -->
+Database `data/disasterinsight.db` sudah disertakan, jadi langkah ini hanya
+diperlukan untuk membangun ulang.
+
+1. Unduh data mentah dari sumber (lihat bagian *Sumber data*) dan letakkan di
+   `data/raw/` dengan nama:
+   - `<nama file kejadian banjir>`
+   - `<nama file tanah longsor>`
+   - `<nama file karhutla>`
+   - `<nama file agregat>`
+2. Dari folder `backend`, jalankan:
+   ```powershell
+   <perintah build_db yang sebenarnya>
+   ```
+3. Hasilnya: `data/disasterinsight.db`.
 
 ### 4. Pengujian
 
@@ -168,8 +177,6 @@ Data diunduh dari sumber resmi dan **tidak ada data yang dibuat sendiri**. Perik
 
 ## Lisensi
 
-<!-- TODO: pilih lisensi (misalnya MIT untuk kode) dan catat bahwa data tunduk pada ketentuan sumbernya -->
+Kode sumber dilisensikan di bawah [Lisensi MIT](LICENSE).
 
-## Penulis
-
-<!-- TODO: nama, institusi, dan kontak -->
+Data kejadian bencana dan batas wilayah berasal dari BNPB dan BIG, dan tunduk pada ketentuan penggunaan masing-masing sumber. Lisensi MIT hanya berlaku untuk kode di repositori ini, bukan untuk data mentah.
